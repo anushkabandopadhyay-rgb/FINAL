@@ -3,16 +3,15 @@
     <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
         <title>Furniture AR Business Card</title>
-        <!-- A-Frame & AR.js Libraries -->
+        <!-- A-Frame & AR.js Stable CDN Dependencies -->
         <script src="https://cdn.jsdelivr.net/npm/aframe@1.2.0/dist/aframe-master.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/ar.js@2.2.2/aframe/build/aframe-ar.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/gh/fcor/arjs-gestures@master/dist/gestures.js"></script>
 
         <style>
-            /* Single Consolidated 2D Card with Rounded Edges */
+            /* 2D Glassmorphic Overlay Info Card */
             .ar-info-card {
                 position: fixed;
-                bottom: 24px;
+                bottom: 20px;
                 left: 50%;
                 transform: translateX(-50%);
                 width: 88%;
@@ -20,34 +19,39 @@
                 background-color: #ffffff;
                 color: #000000;
                 border-radius: 20px;
-                padding: 20px;
+                padding: 18px 20px;
                 box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
                 font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
                 z-index: 9999;
                 display: none;
                 border: 1px solid #e2e8f0;
+                transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            }
+
+            .ar-info-card:active {
+                transform: translateX(-50%) scale(0.98);
             }
 
             .ar-info-card .brand {
-                font-size: 0.75rem;
+                font-size: 0.72rem;
                 font-weight: 800;
                 color: #64748b;
                 text-transform: uppercase;
                 letter-spacing: 1.2px;
-                margin-bottom: 4px;
+                margin-bottom: 2px;
             }
 
             .ar-info-card .title {
-                font-size: 1.25rem;
+                font-size: 1.15rem;
                 font-weight: 800;
                 color: #0f172a;
-                margin-bottom: 12px;
+                margin-bottom: 10px;
             }
 
             .ar-info-card .details-grid {
                 display: grid;
                 grid-template-columns: 1fr 1fr;
-                gap: 12px;
+                gap: 10px;
                 padding-top: 10px;
                 border-top: 1px solid #f1f5f9;
             }
@@ -58,22 +62,22 @@
             }
 
             .ar-info-card .detail-label {
-                font-size: 0.68rem;
+                font-size: 0.65rem;
                 font-weight: 700;
                 color: #94a3b8;
                 text-transform: uppercase;
             }
 
             .ar-info-card .detail-value {
-                font-size: 0.88rem;
+                font-size: 0.82rem;
                 font-weight: 700;
                 color: #1e293b;
                 margin-top: 2px;
             }
 
             .ar-info-card .price-row {
-                margin-top: 14px;
-                padding-top: 10px;
+                margin-top: 12px;
+                padding-top: 8px;
                 border-top: 1px solid #f1f5f9;
                 display: flex;
                 justify-content: space-between;
@@ -81,22 +85,106 @@
             }
 
             .ar-info-card .price-label {
-                font-size: 0.8rem;
+                font-size: 0.75rem;
                 font-weight: 700;
                 color: #64748b;
                 text-transform: uppercase;
             }
 
             .ar-info-card .price-value {
-                font-size: 1.35rem;
+                font-size: 1.25rem;
                 font-weight: 900;
                 color: #000000;
             }
+
+            /* On-screen Micro-Interaction Helper Pills */
+            .gesture-hint {
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: rgba(15, 23, 42, 0.85);
+                backdrop-filter: blur(8px);
+                color: #ffffff;
+                padding: 8px 16px;
+                border-radius: 30px;
+                font-size: 0.75rem;
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                font-weight: 600;
+                letter-spacing: 0.5px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+                z-index: 9999;
+                pointer-events: none;
+                display: none;
+            }
         </style>
+
+        <script>
+            // Register Touch Micro-Interaction Component for Pinch-Zoom & One-Finger Rotation
+            AFRAME.registerComponent('touch-controls', {
+                init: function () {
+                    this.element = this.el;
+                    this.initialScale = { x: 0.08, y: 0.08, z: 0.08 };
+                    this.scaleFactor = 1;
+                    this.initialDistance = null;
+                    this.previousTouchX = null;
+
+                    window.addEventListener('touchstart', (e) => {
+                        if (e.touches.length === 2) {
+                            this.initialDistance = Math.hypot(
+                                e.touches[0].pageX - e.touches[1].pageX,
+                                e.touches[0].pageY - e.touches[1].pageY
+                            );
+                        } else if (e.touches.length === 1) {
+                            this.previousTouchX = e.touches[0].pageX;
+                        }
+                    });
+
+                    window.addEventListener('touchmove', (e) => {
+                        // Pinch to Zoom In / Zoom Out
+                        if (e.touches.length === 2 && this.initialDistance) {
+                            const currentDistance = Math.hypot(
+                                e.touches[0].pageX - e.touches[1].pageX,
+                                e.touches[0].pageY - e.touches[1].pageY
+                            );
+                            const delta = currentDistance / this.initialDistance;
+                            this.scaleFactor = Math.min(Math.max(this.scaleFactor * delta, 0.1), 5.0);
+
+                            this.element.setAttribute('scale', {
+                                x: this.initialScale.x * this.scaleFactor,
+                                y: this.initialScale.y * this.scaleFactor,
+                                z: this.initialScale.z * this.scaleFactor
+                            });
+
+                            this.initialDistance = currentDistance;
+                        } 
+                        // One-finger Drag to Rotate Chair
+                        else if (e.touches.length === 1 && this.previousTouchX !== null) {
+                            const deltaX = e.touches[0].pageX - this.previousTouchX;
+                            const currentRotation = this.element.getAttribute('rotation');
+                            this.element.setAttribute('rotation', {
+                                x: currentRotation.x,
+                                y: currentRotation.y + deltaX * 0.5,
+                                z: currentRotation.z
+                            });
+                            this.previousTouchX = e.touches[0].pageX;
+                        }
+                    });
+
+                    window.addEventListener('touchend', () => {
+                        this.initialDistance = null;
+                        this.previousTouchX = null;
+                    });
+                }
+            });
+        </script>
     </head>
 
     <body style="margin: 0px; overflow: hidden;">
-        <!-- Single Big Rounded Product Info Label -->
+        <!-- UI Helper Pill -->
+        <div id="gestureHint" class="gesture-hint">Pinch to Zoom • Drag to Rotate • Tap Chair for Badge</div>
+
+        <!-- Single Rounded Product Details Card -->
         <div id="productCard" class="ar-info-card">
             <div class="brand">LUXURY COMFORT CO.</div>
             <div class="title">Ergonomic Luxury Armchair</div>
@@ -133,17 +221,16 @@
             renderer="logarithmicDepthBuffer: true; colorManagement: true;"
             arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false;"
             id="scene"
-            gesture-detector
         >
             <a-assets>
                 <a-asset-item id="chair-model" src="asset.gltf" crossorigin="anonymous"></a-asset-item>
             </a-assets>
 
-            <!-- Lighting -->
+            <!-- Balanced Lighting Setup -->
             <a-entity light="type: ambient; intensity: 1.8;"></a-entity>
             <a-entity light="type: directional; intensity: 1.2;" position="2 4 3"></a-entity>
 
-            <!-- AR Marker -->
+            <!-- AR Marker Target -->
             <a-marker
                 id="furniture-marker"
                 type="pattern"
@@ -156,23 +243,23 @@
             >
             </a-marker>
 
-            <!-- Fluid Anchor Entity Sitting Outside Marker in Scene Space -->
+            <!-- Persistent World-Space Entity Container -->
             <a-entity id="persistent-container" visible="false">
-                <!-- 3D Chair Model -->
+                <!-- 3D Chair Model (Initial Base Scale reduced to 0.08) -->
                 <a-entity
                     id="chair-entity"
                     position="0 0 0"
-                    scale="1.5 1.5 1.5"
+                    scale="0.08 0.08 0.08"
                     rotation="0 0 0"
                     gltf-model="#chair-model"
                     class="clickable"
-                    gesture-handler="minScale: 0.2; maxScale: 8;"
+                    touch-controls
                 >
-                    <!-- ALL CAPS NEW ARRIVAL Text Label Above Chair -->
-                    <a-entity position="0 1.5 0" rotation="-30 0 0">
+                    <!-- Interactive Pop-up NEW ARRIVAL Header -->
+                    <a-entity id="new-arrival-header" position="0 8 0" rotation="0 0 0" visible="false">
                         <a-plane
-                            width="2.2"
-                            height="0.4"
+                            width="8"
+                            height="1.6"
                             color="#FFFFFF"
                             material="shader: flat; opacity: 1;"
                             geometry="primitive: plane;"
@@ -181,8 +268,8 @@
                                 value="NEW ARRIVAL"
                                 color="#000000"
                                 align="center"
-                                position="0 0 0.02"
-                                scale="0.6 0.6 0.6"
+                                position="0 0 0.1"
+                                scale="2.5 2.5 2.5"
                                 font="dejavu"
                                 bold="true"
                             ></a-text>
@@ -198,10 +285,13 @@
             document.addEventListener('DOMContentLoaded', () => {
                 const marker = document.getElementById('furniture-marker');
                 const container = document.getElementById('persistent-container');
+                const chair = document.getElementById('chair-entity');
+                const newArrivalHeader = document.getElementById('new-arrival-header');
                 const card = document.getElementById('productCard');
+                const gestureHint = document.getElementById('gestureHint');
                 let isAnchored = false;
 
-                // Lock position to world space once scanned so camera movement keeps model in place
+                // Anchor position to room coordinate space once scanned
                 marker.addEventListener('markerFound', () => {
                     if (!isAnchored) {
                         const markerWorldPos = new THREE.Vector3();
@@ -221,6 +311,19 @@
                         isAnchored = true;
                     }
                     card.style.display = 'block';
+                    gestureHint.style.display = 'block';
+                });
+
+                // Micro-Interaction: Tap chair model to toggle the "NEW ARRIVAL" header badge
+                chair.addEventListener('click', () => {
+                    const isVisible = newArrivalHeader.getAttribute('visible');
+                    newArrivalHeader.setAttribute('visible', !isVisible);
+
+                    // Card bounce animation feedback
+                    card.style.transform = 'translateX(-50%) scale(1.05)';
+                    setTimeout(() => {
+                        card.style.transform = 'translateX(-50%) scale(1)';
+                    }, 150);
                 });
             });
         </script>
