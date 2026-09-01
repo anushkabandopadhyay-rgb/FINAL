@@ -183,15 +183,15 @@
                 emitevents="true"
                 cursor="fuse: false; rayOrigin: mouse;"
             >
-                <!-- 3D Chair Entity: 50% Increased Scale (0.075) & Expanded Max Zoom Limit (15) -->
+                <!-- 3D Chair Entity: Base Scale 0.11 & Max Scale Ceiling 30 -->
                 <a-entity
                     id="chair-entity"
                     position="0 0 0"
-                    scale="0.075 0.075 0.075"
+                    scale="0.11 0.11 0.11"
                     rotation="-90 0 0"
                     gltf-model="#chair-model"
                     class="clickable"
-                    gesture-handler="minScale: 0.01; maxScale: 15;"
+                    gesture-handler="minScale: 0.01; maxScale: 30;"
                 >
                     <!-- Floating NEW ARRIVAL Badge Header -->
                     <a-entity id="new-arrival-header" position="0 15 0" rotation="90 0 0" visible="false">
