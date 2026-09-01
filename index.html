@@ -7,9 +7,125 @@
         <script src="https://cdn.jsdelivr.net/npm/aframe@1.2.0/dist/aframe-master.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/ar.js@2.2.2/aframe/build/aframe-ar.min.js"></script>
         <script src="https://cdn.jsdelivr.net/gh/fcor/arjs-gestures@master/dist/gestures.js"></script>
+
+        <style>
+            /* Single Consolidated 2D Card with Rounded Edges */
+            .ar-info-card {
+                position: fixed;
+                bottom: 24px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 88%;
+                max-width: 380px;
+                background-color: #ffffff;
+                color: #000000;
+                border-radius: 20px;
+                padding: 20px;
+                box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+                z-index: 9999;
+                display: none;
+                border: 1px solid #e2e8f0;
+            }
+
+            .ar-info-card .brand {
+                font-size: 0.75rem;
+                font-weight: 800;
+                color: #64748b;
+                text-transform: uppercase;
+                letter-spacing: 1.2px;
+                margin-bottom: 4px;
+            }
+
+            .ar-info-card .title {
+                font-size: 1.25rem;
+                font-weight: 800;
+                color: #0f172a;
+                margin-bottom: 12px;
+            }
+
+            .ar-info-card .details-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 12px;
+                padding-top: 10px;
+                border-top: 1px solid #f1f5f9;
+            }
+
+            .ar-info-card .detail-item {
+                display: flex;
+                flex-direction: column;
+            }
+
+            .ar-info-card .detail-label {
+                font-size: 0.68rem;
+                font-weight: 700;
+                color: #94a3b8;
+                text-transform: uppercase;
+            }
+
+            .ar-info-card .detail-value {
+                font-size: 0.88rem;
+                font-weight: 700;
+                color: #1e293b;
+                margin-top: 2px;
+            }
+
+            .ar-info-card .price-row {
+                margin-top: 14px;
+                padding-top: 10px;
+                border-top: 1px solid #f1f5f9;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .ar-info-card .price-label {
+                font-size: 0.8rem;
+                font-weight: 700;
+                color: #64748b;
+                text-transform: uppercase;
+            }
+
+            .ar-info-card .price-value {
+                font-size: 1.35rem;
+                font-weight: 900;
+                color: #000000;
+            }
+        </style>
     </head>
 
     <body style="margin: 0px; overflow: hidden;">
+        <!-- Single Big Rounded Product Info Label -->
+        <div id="productCard" class="ar-info-card">
+            <div class="brand">LUXURY COMFORT CO.</div>
+            <div class="title">Ergonomic Luxury Armchair</div>
+
+            <div class="details-grid">
+                <div class="detail-item">
+                    <span class="detail-label">Comfort Level</span>
+                    <span class="detail-value">Ultra Soft / Ergonomic</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Material</span>
+                    <span class="detail-value">Solid Wood & Leather</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Finish</span>
+                    <span class="detail-value">Matte Mahogany</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Warranty</span>
+                    <span class="detail-value">5 Years Limited</span>
+                </div>
+            </div>
+
+            <div class="price-row">
+                <span class="price-label">Price</span>
+                <span class="price-value">$299.99</span>
+            </div>
+        </div>
+
         <a-scene
             embedded
             vr-mode-ui="enabled: false;"
@@ -23,26 +139,26 @@
                 <a-asset-item id="chair-model" src="asset.gltf" crossorigin="anonymous"></a-asset-item>
             </a-assets>
 
-            <!-- Scene Lighting -->
-            <a-entity light="type: ambient; intensity: 1.6;"></a-entity>
+            <!-- Lighting -->
+            <a-entity light="type: ambient; intensity: 1.8;"></a-entity>
             <a-entity light="type: directional; intensity: 1.2;" position="2 4 3"></a-entity>
 
-            <!-- Marker Tracking with Extended Motion Persistence -->
+            <!-- AR Marker -->
             <a-marker
                 id="furniture-marker"
                 type="pattern"
                 preset="custom"
                 url="marker.patt"
                 crossorigin="anonymous"
-                smooth="true"
-                smoothCount="10"
-                smoothTolerance="0.01"
-                smoothThreshold="5"
                 raycaster="objects: .clickable"
                 emitevents="true"
                 cursor="fuse: false; rayOrigin: mouse;"
             >
-                <!-- 3D Chair Model (50% Increased Base Scale: 1.5) -->
+            </a-marker>
+
+            <!-- Fluid Anchor Entity Sitting Outside Marker in Scene Space -->
+            <a-entity id="persistent-container" visible="false">
+                <!-- 3D Chair Model -->
                 <a-entity
                     id="chair-entity"
                     position="0 0 0"
@@ -52,86 +168,61 @@
                     class="clickable"
                     gesture-handler="minScale: 0.2; maxScale: 8;"
                 >
-                    <!-- Label 1: Company Name (Top Back) -->
-                    <a-entity position="0 1.2 -0.8" rotation="-30 0 0">
+                    <!-- ALL CAPS NEW ARRIVAL Text Label Above Chair -->
+                    <a-entity position="0 1.5 0" rotation="-30 0 0">
                         <a-plane
-                            width="1.6"
-                            height="0.3"
+                            width="2.2"
+                            height="0.4"
                             color="#FFFFFF"
-                            material="shader: flat; opacity: 0.95;"
+                            material="shader: flat; opacity: 1;"
                             geometry="primitive: plane;"
                         >
                             <a-text
-                                value="LUXURY COMFORT CO."
+                                value="NEW ARRIVAL"
                                 color="#000000"
                                 align="center"
-                                position="0 0 0.01"
-                                scale="0.35 0.35 0.35"
+                                position="0 0 0.02"
+                                scale="0.6 0.6 0.6"
                                 font="dejavu"
-                            ></a-text>
-                        </a-plane>
-                    </a-entity>
-
-                    <!-- Label 2: Product Name & Comfort (Front Center) -->
-                    <a-entity position="0 -0.2 0.9" rotation="-45 0 0">
-                        <a-plane
-                            width="1.8"
-                            height="0.32"
-                            color="#FFFFFF"
-                            material="shader: flat; opacity: 0.95;"
-                        >
-                            <a-text
-                                value="ARMCHAIR | ULTRA ERGONOMIC"
-                                color="#000000"
-                                align="center"
-                                position="0 0 0.01"
-                                scale="0.32 0.32 0.32"
-                                font="dejavu"
-                            ></a-text>
-                        </a-plane>
-                    </a-entity>
-
-                    <!-- Label 3: Price Tag (Right Side) -->
-                    <a-entity position="1.1 0.4 0" rotation="-30 -30 0">
-                        <a-plane
-                            width="1.1"
-                            height="0.3"
-                            color="#FFFFFF"
-                            material="shader: flat; opacity: 0.95;"
-                        >
-                            <a-text
-                                value="PRICE: $299.99"
-                                color="#000000"
-                                align="center"
-                                position="0 0 0.01"
-                                scale="0.35 0.35 0.35"
-                                font="dejavu"
-                            ></a-text>
-                        </a-plane>
-                    </a-entity>
-
-                    <!-- Label 4: Material & Finish (Left Side) -->
-                    <a-entity position="-1.1 0.4 0" rotation="-30 30 0">
-                        <a-plane
-                            width="1.4"
-                            height="0.3"
-                            color="#FFFFFF"
-                            material="shader: flat; opacity: 0.95;"
-                        >
-                            <a-text
-                                value="LEATHER & SOLID WOOD"
-                                color="#000000"
-                                align="center"
-                                position="0 0 0.01"
-                                scale="0.28 0.28 0.28"
-                                font="dejavu"
+                                bold="true"
                             ></a-text>
                         </a-plane>
                     </a-entity>
                 </a-entity>
-            </a-marker>
+            </a-entity>
 
             <a-entity camera></a-entity>
         </a-scene>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const marker = document.getElementById('furniture-marker');
+                const container = document.getElementById('persistent-container');
+                const card = document.getElementById('productCard');
+                let isAnchored = false;
+
+                // Lock position to world space once scanned so camera movement keeps model in place
+                marker.addEventListener('markerFound', () => {
+                    if (!isAnchored) {
+                        const markerWorldPos = new THREE.Vector3();
+                        const markerWorldQuaternion = new THREE.Quaternion();
+                        const markerWorldScale = new THREE.Vector3();
+
+                        marker.object3D.matrixWorld.decompose(
+                            markerWorldPos,
+                            markerWorldQuaternion,
+                            markerWorldScale
+                        );
+
+                        container.object3D.position.copy(markerWorldPos);
+                        container.object3D.quaternion.copy(markerWorldQuaternion);
+                        container.setAttribute('visible', 'true');
+
+                        isAnchored = true;
+                    }
+                    card.style.display = 'block';
+                });
+            });
+        </script>
     </body>
 </html>
