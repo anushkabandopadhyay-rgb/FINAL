@@ -3,12 +3,13 @@
     <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
         <title>Furniture AR Business Card</title>
-        <!-- A-Frame & AR.js Stable Dependencies -->
+        <!-- A-Frame & AR.js Libraries -->
         <script src="https://cdn.jsdelivr.net/npm/aframe@1.2.0/dist/aframe-master.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/ar.js@2.2.2/aframe/build/aframe-ar.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/gh/fcor/arjs-gestures@master/dist/gestures.js"></script>
 
         <style>
-            /* 2D Glassmorphic Overlay Info Card */
+            /* Glassmorphic 2D Information Card */
             .ar-info-card {
                 position: fixed;
                 bottom: 20px;
@@ -25,7 +26,7 @@
                 z-index: 9999;
                 display: none;
                 border: 1px solid #e2e8f0;
-                transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                transition: transform 0.2s ease;
             }
 
             .ar-info-card:active {
@@ -97,7 +98,7 @@
                 color: #000000;
             }
 
-            /* Gesture Hint Banner */
+            /* Gesture Guidance Banner */
             .gesture-hint {
                 position: fixed;
                 top: 20px;
@@ -118,74 +119,13 @@
                 display: none;
             }
         </style>
-
-        <script>
-            // Touch Component for Pinch-to-Zoom & One-Finger Rotation
-            AFRAME.registerComponent('touch-controls', {
-                init: function () {
-                    this.element = this.el;
-                    // Adjusted starting base scale
-                    this.baseScale = 0.008;
-                    this.scaleFactor = 1;
-                    this.initialDistance = null;
-                    this.previousTouchX = null;
-
-                    window.addEventListener('touchstart', (e) => {
-                        if (e.touches.length === 2) {
-                            this.initialDistance = Math.hypot(
-                                e.touches[0].pageX - e.touches[1].pageX,
-                                e.touches[0].pageY - e.touches[1].pageY
-                            );
-                        } else if (e.touches.length === 1) {
-                            this.previousTouchX = e.touches[0].pageX;
-                        }
-                    });
-
-                    window.addEventListener('touchmove', (e) => {
-                        // Pinch to Zoom
-                        if (e.touches.length === 2 && this.initialDistance) {
-                            const currentDistance = Math.hypot(
-                                e.touches[0].pageX - e.touches[1].pageX,
-                                e.touches[0].pageY - e.touches[1].pageY
-                            );
-                            const delta = currentDistance / this.initialDistance;
-                            this.scaleFactor = Math.min(Math.max(this.scaleFactor * delta, 0.2), 10.0);
-
-                            const newScale = this.baseScale * this.scaleFactor;
-                            this.element.setAttribute('scale', {
-                                x: newScale,
-                                y: newScale,
-                                z: newScale
-                            });
-
-                            this.initialDistance = currentDistance;
-                        } 
-                        // Drag to Rotate
-                        else if (e.touches.length === 1 && this.previousTouchX !== null) {
-                            const deltaX = e.touches[0].pageX - this.previousTouchX;
-                            const currentRotation = this.element.getAttribute('rotation');
-                            this.element.setAttribute('rotation', {
-                                x: currentRotation.x,
-                                y: currentRotation.y + deltaX * 0.5,
-                                z: currentRotation.z
-                            });
-                            this.previousTouchX = e.touches[0].pageX;
-                        }
-                    });
-
-                    window.addEventListener('touchend', () => {
-                        this.initialDistance = null;
-                        this.previousTouchX = null;
-                    });
-                }
-            });
-        </script>
     </head>
 
     <body style="margin: 0px; overflow: hidden;">
+        <!-- Screen Gesture Helper -->
         <div id="gestureHint" class="gesture-hint">Pinch to Zoom • Drag to Rotate • Tap Chair for Badge</div>
 
-        <!-- Single Rounded Product Details Card -->
+        <!-- Single Rounded Product Card -->
         <div id="productCard" class="ar-info-card">
             <div class="brand">LUXURY COMFORT CO.</div>
             <div class="title">Ergonomic Luxury Armchair</div>
@@ -222,16 +162,17 @@
             renderer="logarithmicDepthBuffer: true; colorManagement: true;"
             arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false;"
             id="scene"
+            gesture-detector
         >
             <a-assets>
                 <a-asset-item id="chair-model" src="asset.gltf" crossorigin="anonymous"></a-asset-item>
             </a-assets>
 
-            <!-- Balanced Lighting -->
+            <!-- Lighting -->
             <a-entity light="type: ambient; intensity: 1.8;"></a-entity>
             <a-entity light="type: directional; intensity: 1.2;" position="2 4 3"></a-entity>
 
-            <!-- AR Marker Target -->
+            <!-- Marker Entity with Native Tracking -->
             <a-marker
                 id="furniture-marker"
                 type="pattern"
@@ -242,25 +183,21 @@
                 emitevents="true"
                 cursor="fuse: false; rayOrigin: mouse;"
             >
-            </a-marker>
-
-            <!-- Persistent World-Space Entity Container -->
-            <a-entity id="persistent-container" visible="false">
-                <!-- 3D Chair Model (Centered offset position and compact base scale) -->
+                <!-- 3D Chair Model (Visible Baseline Scale 0.2) -->
                 <a-entity
                     id="chair-entity"
-                    position="0 -0.5 -1"
-                    scale="0.008 0.008 0.008"
+                    position="0 0 0"
+                    scale="0.2 0.2 0.2"
                     rotation="0 0 0"
                     gltf-model="#chair-model"
                     class="clickable"
-                    touch-controls
+                    gesture-handler="minScale: 0.05; maxScale: 3;"
                 >
-                    <!-- Pop-up NEW ARRIVAL Header -->
-                    <a-entity id="new-arrival-header" position="0 80 0" rotation="0 0 0" visible="false">
+                    <!-- Floating NEW ARRIVAL Header -->
+                    <a-entity id="new-arrival-header" position="0 4 0" rotation="-30 0 0" visible="false">
                         <a-plane
-                            width="90"
-                            height="20"
+                            width="4"
+                            height="0.8"
                             color="#FFFFFF"
                             material="shader: flat; opacity: 1;"
                             geometry="primitive: plane;"
@@ -269,15 +206,15 @@
                                 value="NEW ARRIVAL"
                                 color="#000000"
                                 align="center"
-                                position="0 0 1"
-                                scale="30 30 30"
+                                position="0 0 0.05"
+                                scale="1.2 1.2 1.2"
                                 font="dejavu"
                                 bold="true"
                             ></a-text>
                         </a-plane>
                     </a-entity>
                 </a-entity>
-            </a-entity>
+            </a-marker>
 
             <a-entity camera></a-entity>
         </a-scene>
@@ -285,42 +222,23 @@
         <script>
             document.addEventListener('DOMContentLoaded', () => {
                 const marker = document.getElementById('furniture-marker');
-                const container = document.getElementById('persistent-container');
                 const chair = document.getElementById('chair-entity');
                 const newArrivalHeader = document.getElementById('new-arrival-header');
                 const card = document.getElementById('productCard');
                 const gestureHint = document.getElementById('gestureHint');
-                let isAnchored = false;
 
-                // Anchor position to camera coordinate space once scanned
+                // Display info UI when marker is scanned
                 marker.addEventListener('markerFound', () => {
-                    if (!isAnchored) {
-                        const markerWorldPos = new THREE.Vector3();
-                        const markerWorldQuaternion = new THREE.Quaternion();
-                        const markerWorldScale = new THREE.Vector3();
-
-                        marker.object3D.matrixWorld.decompose(
-                            markerWorldPos,
-                            markerWorldQuaternion,
-                            markerWorldScale
-                        );
-
-                        container.object3D.position.copy(markerWorldPos);
-                        container.object3D.quaternion.copy(markerWorldQuaternion);
-                        container.setAttribute('visible', 'true');
-
-                        isAnchored = true;
-                    }
                     card.style.display = 'block';
                     gestureHint.style.display = 'block';
                 });
 
-                // Tap chair model to toggle NEW ARRIVAL badge
+                // Micro-Interaction: Tap chair to toggle "NEW ARRIVAL" header badge
                 chair.addEventListener('click', () => {
                     const isVisible = newArrivalHeader.getAttribute('visible');
                     newArrivalHeader.setAttribute('visible', !isVisible);
 
-                    // Touch feedback bounce on card
+                    // Touch animation feedback on card
                     card.style.transform = 'translateX(-50%) scale(1.05)';
                     setTimeout(() => {
                         card.style.transform = 'translateX(-50%) scale(1)';
