@@ -1,37 +1,38 @@
 <!doctype html>
 <html>
     <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
         <title>Furniture AR Visiting Card</title>
-        <!-- A-Frame Library -->
-        <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
-        <!-- AR.js Library -->
+        <!-- Stable A-Frame CDN -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/aframe/1.2.0/aframe.min.js"></script>
+        <!-- Stable AR.js for A-Frame CDN -->
         <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
-        <!-- Extra Loaders for animations -->
-        <script src="https://raw.githack.com/donmccurdy/aframe-extras/master/dist/aframe-extras.loaders.min.js"></script>
-        <!-- Gesture controls -->
-        <script src="https://raw.githack.com/AR-js-org/studio-backend/master/src/modules/marker/tools/gesture-detector.js"></script>
-        <script src="https://raw.githack.com/AR-js-org/studio-backend/master/src/modules/marker/tools/gesture-handler.js"></script>
+        <!-- Extra Loaders for Animations -->
+        <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.min.js"></script>
+        <!-- Gesture Controls -->
+        <script src="https://cdn.jsdelivr.net/gh/AR-js-org/studio-backend@master/src/modules/marker/tools/gesture-detector.js"></script>
+        <script src="https://cdn.jsdelivr.net/gh/AR-js-org/studio-backend@master/src/modules/marker/tools/gesture-handler.js"></script>
     </head>
 
-    <body style="margin: 0; overflow: hidden;">
+    <body style="margin: 0px; overflow: hidden;">
         <a-scene
+            embedded
             vr-mode-ui="enabled: false;"
             loading-screen="enabled: false;"
             renderer="logarithmicDepthBuffer: true;"
             arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false;"
             id="scene"
-            embedded
             gesture-detector
         >
             <a-assets>
-                <!-- 3D Model Asset (Updated Path) -->
+                <!-- 3D Model Asset -->
                 <a-asset-item
                     id="chair-model"
                     src="asset.gltf"
                 ></a-asset-item>
             </a-assets>
 
-            <!-- Custom Marker (Updated Path) -->
+            <!-- Custom Marker -->
             <a-marker
                 id="furniture-marker"
                 type="pattern"
@@ -52,7 +53,7 @@
                     gesture-handler
                 ></a-entity>
 
-                <!-- Company Info & Description Panel -->
+                <!-- Company Info Panel -->
                 <a-plane
                     position="-1.2 0 -0.5"
                     rotation="-90 0 0"
