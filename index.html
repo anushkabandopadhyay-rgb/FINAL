@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
     <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
         <title>Furniture AR Business Card</title>
         <!-- A-Frame & AR.js Libraries -->
         <script src="https://cdn.jsdelivr.net/npm/aframe@1.2.0/dist/aframe-master.min.js"></script>
@@ -168,11 +168,11 @@
                 <a-asset-item id="chair-model" src="asset.gltf" crossorigin="anonymous"></a-asset-item>
             </a-assets>
 
-            <!-- Lighting -->
-            <a-entity light="type: ambient; intensity: 1.8;"></a-entity>
-            <a-entity light="type: directional; intensity: 1.2;" position="2 4 3"></a-entity>
+            <!-- Bright Ambient and Directional Lighting for Model Realism -->
+            <a-entity light="type: ambient; intensity: 2.2;"></a-entity>
+            <a-entity light="type: directional; intensity: 1.5;" position="1 4 2"></a-entity>
 
-            <!-- Marker Entity with Native Tracking -->
+            <!-- Marker Entity with Direct Target Mapping -->
             <a-marker
                 id="furniture-marker"
                 type="pattern"
@@ -183,21 +183,21 @@
                 emitevents="true"
                 cursor="fuse: false; rayOrigin: mouse;"
             >
-                <!-- 3D Chair Model (Visible Baseline Scale 0.2) -->
+                <!-- 3D Chair Entity Positioned & Formatted for Mobile Viewing -->
                 <a-entity
                     id="chair-entity"
                     position="0 0 0"
-                    scale="0.2 0.2 0.2"
-                    rotation="0 0 0"
+                    scale="0.05 0.05 0.05"
+                    rotation="-90 0 0"
                     gltf-model="#chair-model"
                     class="clickable"
-                    gesture-handler="minScale: 0.05; maxScale: 3;"
+                    gesture-handler="minScale: 0.01; maxScale: 2.5;"
                 >
-                    <!-- Floating NEW ARRIVAL Header -->
-                    <a-entity id="new-arrival-header" position="0 4 0" rotation="-30 0 0" visible="false">
+                    <!-- Floating NEW ARRIVAL Badge Header -->
+                    <a-entity id="new-arrival-header" position="0 15 0" rotation="90 0 0" visible="false">
                         <a-plane
-                            width="4"
-                            height="0.8"
+                            width="14"
+                            height="3"
                             color="#FFFFFF"
                             material="shader: flat; opacity: 1;"
                             geometry="primitive: plane;"
@@ -206,8 +206,8 @@
                                 value="NEW ARRIVAL"
                                 color="#000000"
                                 align="center"
-                                position="0 0 0.05"
-                                scale="1.2 1.2 1.2"
+                                position="0 0 0.2"
+                                scale="4 4 4"
                                 font="dejavu"
                                 bold="true"
                             ></a-text>
@@ -216,6 +216,7 @@
                 </a-entity>
             </a-marker>
 
+            <!-- AR Camera -->
             <a-entity camera></a-entity>
         </a-scene>
 
