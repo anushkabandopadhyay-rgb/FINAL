@@ -168,11 +168,11 @@
                 <a-asset-item id="chair-model" src="asset.gltf" crossorigin="anonymous"></a-asset-item>
             </a-assets>
 
-            <!-- Bright Ambient and Directional Lighting for Model Realism -->
+            <!-- Lighting Setup -->
             <a-entity light="type: ambient; intensity: 2.2;"></a-entity>
             <a-entity light="type: directional; intensity: 1.5;" position="1 4 2"></a-entity>
 
-            <!-- Marker Entity with Direct Target Mapping -->
+            <!-- Marker Entity -->
             <a-marker
                 id="furniture-marker"
                 type="pattern"
@@ -183,15 +183,15 @@
                 emitevents="true"
                 cursor="fuse: false; rayOrigin: mouse;"
             >
-                <!-- 3D Chair Entity Positioned & Formatted for Mobile Viewing -->
+                <!-- 3D Chair Entity: 50% Increased Scale (0.075) & Expanded Max Zoom Limit (15) -->
                 <a-entity
                     id="chair-entity"
                     position="0 0 0"
-                    scale="0.05 0.05 0.05"
+                    scale="0.075 0.075 0.075"
                     rotation="-90 0 0"
                     gltf-model="#chair-model"
                     class="clickable"
-                    gesture-handler="minScale: 0.01; maxScale: 2.5;"
+                    gesture-handler="minScale: 0.01; maxScale: 15;"
                 >
                     <!-- Floating NEW ARRIVAL Badge Header -->
                     <a-entity id="new-arrival-header" position="0 15 0" rotation="90 0 0" visible="false">
