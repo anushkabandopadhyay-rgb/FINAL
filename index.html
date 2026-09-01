@@ -2,129 +2,187 @@
 <html>
     <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-        <title>Furniture AR Visiting Card</title>
-        <!-- Stable A-Frame CDN -->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/aframe/1.2.0/aframe.min.js"></script>
-        <!-- Stable AR.js for A-Frame CDN -->
-        <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
-        <!-- Extra Loaders for Animations -->
-        <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.min.js"></script>
-        <!-- Gesture Controls -->
-        <script src="https://cdn.jsdelivr.net/gh/AR-js-org/studio-backend@master/src/modules/marker/tools/gesture-detector.js"></script>
-        <script src="https://cdn.jsdelivr.net/gh/AR-js-org/studio-backend@master/src/modules/marker/tools/gesture-handler.js"></script>
+        <title>Furniture AR Business Card</title>
+        <!-- A-Frame & AR.js Stable Libraries -->
+        <script src="https://cdn.jsdelivr.net/npm/aframe@1.2.0/dist/aframe-master.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/ar.js@2.2.2/aframe/build/aframe-ar.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/gh/fcor/arjs-gestures@master/dist/gestures.js"></script>
+
+        <style>
+            /* Interactive Screen Overlay UI */
+            .ar-overlay {
+                position: fixed;
+                bottom: 30px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 85%;
+                max-width: 360px;
+                background: rgba(20, 20, 20, 0.88);
+                backdrop-filter: blur(10px);
+                border-radius: 16px;
+                padding: 18px 20px;
+                color: #ffffff;
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+                border: 1px solid rgba(255, 255, 255, 0.15);
+                display: none;
+                z-index: 9999;
+                transition: opacity 0.3s ease;
+            }
+
+            .ar-overlay h2 {
+                margin: 0 0 4px 0;
+                font-size: 1.2rem;
+                font-weight: 700;
+                color: #ffffff;
+            }
+
+            .ar-overlay .company {
+                font-size: 0.8rem;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                color: #1abc9c;
+                margin-bottom: 12px;
+                font-weight: 600;
+            }
+
+            .info-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+                font-size: 0.85rem;
+                border-top: 1px solid rgba(255,255,255,0.1);
+                padding-top: 10px;
+            }
+
+            .info-item span {
+                display: block;
+                font-size: 0.7rem;
+                color: #aaaaaa;
+                text-transform: uppercase;
+            }
+
+            .info-item strong {
+                color: #e0e0e0;
+                font-weight: 500;
+            }
+
+            .price-tag {
+                margin-top: 12px;
+                font-size: 1.2rem;
+                font-weight: 700;
+                color: #f1c40f;
+                text-align: right;
+            }
+
+            .close-btn {
+                position: absolute;
+                top: 10px;
+                right: 14px;
+                background: none;
+                border: none;
+                color: #aaaaaa;
+                font-size: 1.2rem;
+                cursor: pointer;
+            }
+        </style>
     </head>
 
     <body style="margin: 0px; overflow: hidden;">
+        <!-- UI Card Overlay -->
+        <div id="infoCard" class="ar-overlay">
+            <button class="close-btn" onclick="hideCard()">✕</button>
+            <h2 id="cardTitle">Luxury Leather Armchair</h2>
+            <div class="company" id="cardCompany">Luxury Comfort Co.</div>
+            
+            <div class="info-grid">
+                <div class="info-item">
+                    <span>Comfort Level</span>
+                    <strong id="cardComfort">Ultra Ergonomic (Soft)</strong>
+                </div>
+                <div class="info-item">
+                    <span>Material</span>
+                    <strong id="cardMaterial">Premium Italian Leather</strong>
+                </div>
+                <div class="info-item">
+                    <span>Finish</span>
+                    <strong id="cardFinish">Matte Mahogany</strong>
+                </div>
+                <div class="info-item">
+                    <span>Warranty</span>
+                    <strong>5 Years Limited</strong>
+                </div>
+            </div>
+
+            <div class="price-tag" id="cardPrice">$299.99 - $349.99</div>
+        </div>
+
         <a-scene
             embedded
             vr-mode-ui="enabled: false;"
             loading-screen="enabled: false;"
-            renderer="logarithmicDepthBuffer: true;"
+            renderer="logarithmicDepthBuffer: true; colorManagement: true;"
             arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false;"
             id="scene"
             gesture-detector
         >
             <a-assets>
-                <!-- 3D Model Asset -->
-                <a-asset-item
-                    id="chair-model"
-                    src="asset.gltf"
-                ></a-asset-item>
+                <a-asset-item id="chair-model" src="asset.gltf" crossorigin="anonymous"></a-asset-item>
             </a-assets>
 
-            <!-- Custom Marker -->
+            <!-- Lighting to make model visible -->
+            <a-entity light="type: ambient; intensity: 1.5;"></a-entity>
+            <a-entity light="type: directional; intensity: 1;" position="1 4 2"></a-entity>
+
             <a-marker
                 id="furniture-marker"
                 type="pattern"
                 preset="custom"
                 url="marker.patt"
+                crossorigin="anonymous"
                 raycaster="objects: .clickable"
                 emitevents="true"
                 cursor="fuse: false; rayOrigin: mouse;"
             >
-                <!-- 3D Chair Model -->
+                <!-- 3D Model with Click Listener and Gesture Controls -->
                 <a-entity
                     id="chair-entity"
                     position="0 0 0"
-                    scale="0.01 0.01 0.01"
-                    rotation="-90 0 0"
+                    scale="1 1 1"
+                    rotation="0 0 0"
                     gltf-model="#chair-model"
                     class="clickable"
                     gesture-handler
                 ></a-entity>
-
-                <!-- Company Info Panel -->
-                <a-plane
-                    position="-1.2 0 -0.5"
-                    rotation="-90 0 0"
-                    width="1.8"
-                    height="1.2"
-                    color="#2C3E50"
-                    material="transparent: true; opacity: 0.85"
-                >
-                    <a-text
-                        value="LUXURY COMFORT CO."
-                        color="#FFFFFF"
-                        align="center"
-                        position="0 0.4 0.01"
-                        scale="0.4 0.4 0.4"
-                        bold="true"
-                    ></a-text>
-
-                    <a-text
-                        value="Premium Furniture Solutions\nCrafted with Ergonomic\nWood & Fine Fabric Design."
-                        color="#BDC3C7"
-                        align="center"
-                        position="0 0.1 0.01"
-                        scale="0.25 0.25 0.25"
-                    ></a-text>
-
-                    <a-text
-                        value="Contact: info@furniture.com\nWeb: www.furniture.com"
-                        color="#1ABC9C"
-                        align="center"
-                        position="0 -0.3 0.01"
-                        scale="0.22 0.22 0.22"
-                    ></a-text>
-                </a-plane>
-
-                <!-- Product Pricing Panel -->
-                <a-plane
-                    position="1.2 0 -0.5"
-                    rotation="-90 0 0"
-                    width="1.5"
-                    height="1.2"
-                    color="#16A085"
-                    material="transparent: true; opacity: 0.9"
-                >
-                    <a-text
-                        value="ARMCHAIR EDITION"
-                        color="#FFFFFF"
-                        align="center"
-                        position="0 0.4 0.01"
-                        scale="0.35 0.35 0.35"
-                    ></a-text>
-
-                    <a-text
-                        value="Material: Solid Wood & Fabric\nWarranty: 5 Years\nIn Stock: Ready to Ship"
-                        color="#E8F8F5"
-                        align="center"
-                        position="0 0.1 0.01"
-                        scale="0.22 0.22 0.22"
-                    ></a-text>
-
-                    <a-text
-                        value="PRICE: $299.99"
-                        color="#F1C40F"
-                        align="center"
-                        position="0 -0.3 0.01"
-                        scale="0.4 0.4 0.4"
-                    ></a-text>
-                </a-plane>
             </a-marker>
 
-            <!-- AR Camera -->
             <a-entity camera></a-entity>
         </a-scene>
+
+        <script>
+            // Show/Hide Info Overlay
+            function showCard() {
+                document.getElementById('infoCard').style.display = 'block';
+            }
+
+            function hideCard() {
+                document.getElementById('infoCard').style.display = 'none';
+            }
+
+            // Trigger details pop-up on model click/tap
+            document.addEventListener('DOMContentLoaded', () => {
+                const chair = document.getElementById('chair-entity');
+                const marker = document.getElementById('furniture-marker');
+
+                chair.addEventListener('click', () => {
+                    showCard();
+                });
+
+                // Auto hide card when marker disappears from camera view
+                marker.addEventListener('markerLost', () => {
+                    hideCard();
+                });
+            });
+        </script>
     </body>
 </html>
