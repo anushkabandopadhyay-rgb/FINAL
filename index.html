@@ -1,0 +1,129 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Furniture AR Visiting Card</title>
+        <!-- A-Frame Library -->
+        <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
+        <!-- AR.js Library -->
+        <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+        <!-- Extra Loaders for animations -->
+        <script src="https://raw.githack.com/donmccurdy/aframe-extras/master/dist/aframe-extras.loaders.min.js"></script>
+        <!-- Gesture controls -->
+        <script src="https://raw.githack.com/AR-js-org/studio-backend/master/src/modules/marker/tools/gesture-detector.js"></script>
+        <script src="https://raw.githack.com/AR-js-org/studio-backend/master/src/modules/marker/tools/gesture-handler.js"></script>
+    </head>
+
+    <body style="margin: 0; overflow: hidden;">
+        <a-scene
+            vr-mode-ui="enabled: false;"
+            loading-screen="enabled: false;"
+            renderer="logarithmicDepthBuffer: true;"
+            arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false;"
+            id="scene"
+            embedded
+            gesture-detector
+        >
+            <a-assets>
+                <!-- 3D Model Asset -->
+                <a-asset-item
+                    id="chair-model"
+                    src="assets/asset.gltf"
+                ></a-asset-item>
+            </a-assets>
+
+            <!-- Custom Marker -->
+            <a-marker
+                id="furniture-marker"
+                type="pattern"
+                preset="custom"
+                url="assets/marker.patt"
+                raycaster="objects: .clickable"
+                emitevents="true"
+                cursor="fuse: false; rayOrigin: mouse;"
+            >
+                <!-- 3D Chair Model -->
+                <a-entity
+                    id="chair-entity"
+                    position="0 0 0"
+                    scale="0.01 0.01 0.01"
+                    rotation="-90 0 0"
+                    gltf-model="#chair-model"
+                    class="clickable"
+                    gesture-handler
+                ></a-entity>
+
+                <!-- Company Info & Description Panel -->
+                <a-plane
+                    position="-1.2 0 -0.5"
+                    rotation="-90 0 0"
+                    width="1.8"
+                    height="1.2"
+                    color="#2C3E50"
+                    material="transparent: true; opacity: 0.85"
+                >
+                    <a-text
+                        value="LUXURY COMFORT CO."
+                        color="#FFFFFF"
+                        align="center"
+                        position="0 0.4 0.01"
+                        scale="0.4 0.4 0.4"
+                        bold="true"
+                    ></a-text>
+
+                    <a-text
+                        value="Premium Furniture Solutions\nCrafted with Ergonomic\nWood & Fine Fabric Design."
+                        color="#BDC3C7"
+                        align="center"
+                        position="0 0.1 0.01"
+                        scale="0.25 0.25 0.25"
+                    ></a-text>
+
+                    <a-text
+                        value="Contact: info@furniture.com\nWeb: www.furniture.com"
+                        color="#1ABC9C"
+                        align="center"
+                        position="0 -0.3 0.01"
+                        scale="0.22 0.22 0.22"
+                    ></a-text>
+                </a-plane>
+
+                <!-- Product Pricing Panel -->
+                <a-plane
+                    position="1.2 0 -0.5"
+                    rotation="-90 0 0"
+                    width="1.5"
+                    height="1.2"
+                    color="#16A085"
+                    material="transparent: true; opacity: 0.9"
+                >
+                    <a-text
+                        value="ARMCHAIR EDITION"
+                        color="#FFFFFF"
+                        align="center"
+                        position="0 0.4 0.01"
+                        scale="0.35 0.35 0.35"
+                    ></a-text>
+
+                    <a-text
+                        value="Material: Solid Wood & Fabric\nWarranty: 5 Years\nIn Stock: Ready to Ship"
+                        color="#E8F8F5"
+                        align="center"
+                        position="0 0.1 0.01"
+                        scale="0.22 0.22 0.22"
+                    ></a-text>
+
+                    <a-text
+                        value="PRICE: $299.99"
+                        color="#F1C40F"
+                        align="center"
+                        position="0 -0.3 0.01"
+                        scale="0.4 0.4 0.4"
+                    ></a-text>
+                </a-plane>
+            </a-marker>
+
+            <!-- AR Camera -->
+            <a-entity camera></a-entity>
+        </a-scene>
+    </body>
+</html>
