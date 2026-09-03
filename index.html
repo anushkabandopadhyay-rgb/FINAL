@@ -1,251 +1,1730 @@
 <!doctype html>
 <html>
-    <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-        <title>Furniture AR Business Card</title>
-        <!-- A-Frame & AR.js Libraries -->
-        <script src="https://cdn.jsdelivr.net/npm/aframe@1.2.0/dist/aframe-master.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/ar.js@2.2.2/aframe/build/aframe-ar.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/gh/fcor/arjs-gestures@master/dist/gestures.js"></script>
 
-        <style>
-            /* Glassmorphic 2D Information Card */
-            .ar-info-card {
-                position: fixed;
-                bottom: 20px;
-                left: 50%;
-                transform: translateX(-50%);
-                width: 88%;
-                max-width: 380px;
-                background-color: #ffffff;
-                color: #000000;
-                border-radius: 20px;
-                padding: 18px 20px;
-                box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
-                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-                z-index: 9999;
-                display: none;
-                border: 1px solid #e2e8f0;
-                transition: transform 0.2s ease;
-            }
+<head>
 
-            .ar-info-card:active {
-                transform: translateX(-50%) scale(0.98);
-            }
+    <meta name="viewport"
+        content="width=device-width,
+        initial-scale=1.0,
+        maximum-scale=1.0,
+        user-scalable=no">
 
-            .ar-info-card .brand {
-                font-size: 0.72rem;
-                font-weight: 800;
-                color: #64748b;
-                text-transform: uppercase;
-                letter-spacing: 1.2px;
-                margin-bottom: 2px;
-            }
+    <title>Furniture AR Business Card</title>
 
-            .ar-info-card .title {
-                font-size: 1.15rem;
-                font-weight: 800;
-                color: #0f172a;
-                margin-bottom: 10px;
-            }
 
-            .ar-info-card .details-grid {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 10px;
-                padding-top: 10px;
-                border-top: 1px solid #f1f5f9;
-            }
+    <!-- =====================================================
+         A-FRAME
+    ====================================================== -->
 
-            .ar-info-card .detail-item {
-                display: flex;
-                flex-direction: column;
-            }
+    <script src="https://cdn.jsdelivr.net/npm/aframe@1.2.0/dist/aframe-master.min.js"></script>
 
-            .ar-info-card .detail-label {
-                font-size: 0.65rem;
-                font-weight: 700;
-                color: #94a3b8;
-                text-transform: uppercase;
-            }
 
-            .ar-info-card .detail-value {
-                font-size: 0.82rem;
-                font-weight: 700;
-                color: #1e293b;
-                margin-top: 2px;
-            }
+    <!-- =====================================================
+         AR.JS
+    ====================================================== -->
 
-            .ar-info-card .price-row {
-                margin-top: 12px;
-                padding-top: 8px;
-                border-top: 1px solid #f1f5f9;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-            }
+    <script src="https://cdn.jsdelivr.net/npm/ar.js@2.2.2/aframe/build/aframe-ar.min.js"></script>
 
-            .ar-info-card .price-label {
-                font-size: 0.75rem;
-                font-weight: 700;
-                color: #64748b;
-                text-transform: uppercase;
-            }
 
-            .ar-info-card .price-value {
-                font-size: 1.25rem;
-                font-weight: 900;
-                color: #000000;
-            }
+    <!-- =====================================================
+         AR.JS GESTURES
+    ====================================================== -->
 
-            /* Gesture Guidance Banner */
-            .gesture-hint {
-                position: fixed;
-                top: 20px;
-                left: 50%;
-                transform: translateX(-50%);
-                background: rgba(15, 23, 42, 0.85);
-                backdrop-filter: blur(8px);
-                color: #ffffff;
-                padding: 8px 16px;
-                border-radius: 30px;
-                font-size: 0.75rem;
-                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-                font-weight: 600;
-                letter-spacing: 0.5px;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-                z-index: 9999;
-                pointer-events: none;
-                display: none;
-            }
-        </style>
-    </head>
+    <script src="https://cdn.jsdelivr.net/gh/fcor/arjs-gestures@master/dist/gestures.js"></script>
 
-    <body style="margin: 0px; overflow: hidden;">
-        <!-- Screen Gesture Helper -->
-        <div id="gestureHint" class="gesture-hint">Pinch to Zoom • Drag to Rotate • Tap Chair for Badge</div>
 
-        <!-- Single Rounded Product Card -->
-        <div id="productCard" class="ar-info-card">
-            <div class="brand">LUXURY COMFORT CO.</div>
-            <div class="title">Ergonomic Luxury Armchair</div>
+    <!-- =====================================================
+         STYLES
+    ====================================================== -->
 
-            <div class="details-grid">
-                <div class="detail-item">
-                    <span class="detail-label">Comfort Level</span>
-                    <span class="detail-value">Ultra Soft / Ergonomic</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Material</span>
-                    <span class="detail-value">Solid Wood & Leather</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Finish</span>
-                    <span class="detail-value">Matte Mahogany</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Warranty</span>
-                    <span class="detail-value">5 Years Limited</span>
-                </div>
-            </div>
+    <style>
 
-            <div class="price-row">
-                <span class="price-label">Price</span>
-                <span class="price-value">$299.99</span>
-            </div>
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+
+        html,
+        body {
+
+            margin: 0;
+
+            padding: 0;
+
+            width: 100%;
+
+            height: 100%;
+
+            overflow: hidden;
+
+            touch-action: none;
+
+            background: transparent;
+
+        }
+
+
+        /* =====================================================
+           PRODUCT CARD
+        ====================================================== */
+
+        .ar-info-card {
+
+            position: fixed;
+
+            left: 50%;
+
+            bottom: 20px;
+
+            width: 88%;
+
+            max-width: 380px;
+
+            padding: 18px 20px;
+
+            transform:
+                translateX(-50%)
+                translateY(20px)
+                scale(0.96);
+
+            background: #ffffff;
+
+            color: #000000;
+
+            border-radius: 20px;
+
+            border: 1px solid #e2e8f0;
+
+            box-shadow:
+                0 12px 30px
+                rgba(0, 0, 0, 0.30);
+
+            font-family:
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                Roboto,
+                Helvetica,
+                Arial,
+                sans-serif;
+
+            z-index: 9999;
+
+            display: none;
+
+            opacity: 0;
+
+            transition:
+                opacity 0.25s ease,
+                transform 0.25s ease;
+
+            pointer-events: none;
+
+        }
+
+
+        .ar-info-card.show {
+
+            opacity: 1;
+
+            transform:
+                translateX(-50%)
+                translateY(0)
+                scale(1);
+
+        }
+
+
+        /* =====================================================
+           BRAND
+        ====================================================== */
+
+        .ar-info-card .brand {
+
+            font-size: 0.72rem;
+
+            font-weight: 800;
+
+            color: #64748b;
+
+            text-transform: uppercase;
+
+            letter-spacing: 1.2px;
+
+            margin-bottom: 2px;
+
+        }
+
+
+        /* =====================================================
+           TITLE
+        ====================================================== */
+
+        .ar-info-card .title {
+
+            font-size: 1.15rem;
+
+            line-height: 1.25;
+
+            font-weight: 800;
+
+            color: #0f172a;
+
+            margin-bottom: 10px;
+
+        }
+
+
+        /* =====================================================
+           DETAILS
+        ====================================================== */
+
+        .ar-info-card .details-grid {
+
+            display: grid;
+
+            grid-template-columns:
+                1fr 1fr;
+
+            gap: 10px;
+
+            padding-top: 10px;
+
+            border-top:
+                1px solid #f1f5f9;
+
+        }
+
+
+        .ar-info-card .detail-item {
+
+            display: flex;
+
+            flex-direction: column;
+
+        }
+
+
+        .ar-info-card .detail-label {
+
+            font-size: 0.65rem;
+
+            font-weight: 700;
+
+            color: #94a3b8;
+
+            text-transform: uppercase;
+
+        }
+
+
+        .ar-info-card .detail-value {
+
+            font-size: 0.82rem;
+
+            line-height: 1.2;
+
+            font-weight: 700;
+
+            color: #1e293b;
+
+            margin-top: 2px;
+
+        }
+
+
+        /* =====================================================
+           PRICE
+        ====================================================== */
+
+        .ar-info-card .price-row {
+
+            margin-top: 12px;
+
+            padding-top: 8px;
+
+            border-top:
+                1px solid #f1f5f9;
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+        }
+
+
+        .ar-info-card .price-label {
+
+            font-size: 0.75rem;
+
+            font-weight: 700;
+
+            color: #64748b;
+
+            text-transform: uppercase;
+
+        }
+
+
+        .ar-info-card .price-value {
+
+            font-size: 1.25rem;
+
+            font-weight: 900;
+
+            color: #000000;
+
+        }
+
+
+        /* =====================================================
+           GESTURE HINT
+        ====================================================== */
+
+        .gesture-hint {
+
+            position: fixed;
+
+            top: 20px;
+
+            left: 50%;
+
+            transform:
+                translateX(-50%);
+
+            background:
+                rgba(15, 23, 42, 0.88);
+
+            backdrop-filter:
+                blur(8px);
+
+            color: #ffffff;
+
+            padding:
+                9px 16px;
+
+            border-radius: 30px;
+
+            font-size:
+                0.73rem;
+
+            font-family:
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                Roboto,
+                sans-serif;
+
+            font-weight: 600;
+
+            letter-spacing:
+                0.3px;
+
+            box-shadow:
+                0 4px 12px
+                rgba(0, 0, 0, 0.20);
+
+            z-index: 9999;
+
+            pointer-events: none;
+
+            display: none;
+
+            white-space: nowrap;
+
+        }
+
+
+        /* =====================================================
+           PLACED STATUS
+        ====================================================== */
+
+        .placed-label {
+
+            position: fixed;
+
+            top: 62px;
+
+            left: 50%;
+
+            transform:
+                translateX(-50%);
+
+            background:
+                rgba(255, 255, 255, 0.92);
+
+            color:
+                #0f172a;
+
+            padding:
+                7px 13px;
+
+            border-radius:
+                20px;
+
+            font-family:
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                sans-serif;
+
+            font-size:
+                11px;
+
+            font-weight:
+                700;
+
+            box-shadow:
+                0 4px 14px
+                rgba(0, 0, 0, 0.15);
+
+            z-index:
+                9999;
+
+            display:
+                none;
+
+            pointer-events:
+                none;
+
+        }
+
+
+        /* =====================================================
+           RESET BUTTON
+        ====================================================== */
+
+        #resetButton {
+
+            position: fixed;
+
+            top: 18px;
+
+            right: 16px;
+
+            width: 42px;
+
+            height: 42px;
+
+            border: none;
+
+            border-radius: 50%;
+
+            background:
+                rgba(255, 255, 255, 0.94);
+
+            color: #0f172a;
+
+            box-shadow:
+                0 4px 14px
+                rgba(0, 0, 0, 0.18);
+
+            font-size: 20px;
+
+            font-weight: 600;
+
+            z-index: 9999;
+
+            display: none;
+
+            cursor: pointer;
+
+        }
+
+
+        #resetButton:active {
+
+            transform:
+                scale(0.92);
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- =====================================================
+         GESTURE HINT
+    ====================================================== -->
+
+    <div id="gestureHint"
+         class="gesture-hint">
+
+        Tap chair for details
+
+    </div>
+
+
+    <!-- =====================================================
+         PLACED LABEL
+    ====================================================== -->
+
+    <div id="placedLabel"
+         class="placed-label">
+
+        CHAIR PLACED
+
+    </div>
+
+
+    <!-- =====================================================
+         RESET BUTTON
+    ====================================================== -->
+
+    <button id="resetButton">
+
+        ↻
+
+    </button>
+
+
+    <!-- =====================================================
+         PRODUCT INFORMATION CARD
+    ====================================================== -->
+
+    <div id="productCard"
+         class="ar-info-card">
+
+
+        <div class="brand">
+
+            LUXURY COMFORT CO.
+
         </div>
 
-        <a-scene
-            embedded
-            vr-mode-ui="enabled: false;"
-            loading-screen="enabled: false;"
-            renderer="logarithmicDepthBuffer: true; colorManagement: true;"
-            arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false;"
-            id="scene"
-            gesture-detector
-        >
-            <a-assets>
-                <a-asset-item id="chair-model" src="asset.gltf" crossorigin="anonymous"></a-asset-item>
-            </a-assets>
 
-            <!-- Lighting Setup -->
-            <a-entity light="type: ambient; intensity: 2.2;"></a-entity>
-            <a-entity light="type: directional; intensity: 1.5;" position="1 4 2"></a-entity>
+        <div class="title">
 
-            <!-- Marker Entity -->
-            <a-marker
-                id="furniture-marker"
-                type="pattern"
-                preset="custom"
-                url="marker.patt"
-                crossorigin="anonymous"
-                raycaster="objects: .clickable"
-                emitevents="true"
-                cursor="fuse: false; rayOrigin: mouse;"
-            >
-                <!-- 3D Chair Entity: Base Scale 0.11 & Max Scale Ceiling 30 -->
-                <a-entity
-                    id="chair-entity"
-                    position="0 0 0"
-                    scale="0.11 0.11 0.11"
-                    rotation="-90 0 0"
-                    gltf-model="#chair-model"
-                    class="clickable"
-                    gesture-handler="minScale: 0.01; maxScale: 30;"
-                >
-                    <!-- Floating NEW ARRIVAL Badge Header -->
-                    <a-entity id="new-arrival-header" position="0 15 0" rotation="90 0 0" visible="false">
-                        <a-plane
-                            width="14"
-                            height="3"
-                            color="#FFFFFF"
-                            material="shader: flat; opacity: 1;"
-                            geometry="primitive: plane;"
-                        >
-                            <a-text
-                                value="NEW ARRIVAL"
-                                color="#000000"
-                                align="center"
-                                position="0 0 0.2"
-                                scale="4 4 4"
-                                font="dejavu"
-                                bold="true"
-                            ></a-text>
-                        </a-plane>
-                    </a-entity>
-                </a-entity>
-            </a-marker>
+            Ergonomic Luxury Armchair
 
-            <!-- AR Camera -->
-            <a-entity camera></a-entity>
-        </a-scene>
+        </div>
 
-        <script>
-            document.addEventListener('DOMContentLoaded', () => {
-                const marker = document.getElementById('furniture-marker');
-                const chair = document.getElementById('chair-entity');
-                const newArrivalHeader = document.getElementById('new-arrival-header');
-                const card = document.getElementById('productCard');
-                const gestureHint = document.getElementById('gestureHint');
 
-                // Display info UI when marker is scanned
-                marker.addEventListener('markerFound', () => {
-                    card.style.display = 'block';
-                    gestureHint.style.display = 'block';
-                });
+        <div class="details-grid">
 
-                // Micro-Interaction: Tap chair to toggle "NEW ARRIVAL" header badge
-                chair.addEventListener('click', () => {
-                    const isVisible = newArrivalHeader.getAttribute('visible');
-                    newArrivalHeader.setAttribute('visible', !isVisible);
 
-                    // Touch animation feedback on card
-                    card.style.transform = 'translateX(-50%) scale(1.05)';
-                    setTimeout(() => {
-                        card.style.transform = 'translateX(-50%) scale(1)';
-                    }, 150);
-                });
-            });
-        </script>
-    </body>
+            <div class="detail-item">
+
+                <span class="detail-label">
+
+                    Comfort Level
+
+                </span>
+
+                <span class="detail-value">
+
+                    Ultra Soft / Ergonomic
+
+                </span>
+
+            </div>
+
+
+            <div class="detail-item">
+
+                <span class="detail-label">
+
+                    Material
+
+                </span>
+
+                <span class="detail-value">
+
+                    Solid Wood & Leather
+
+                </span>
+
+            </div>
+
+
+            <div class="detail-item">
+
+                <span class="detail-label">
+
+                    Finish
+
+                </span>
+
+                <span class="detail-value">
+
+                    Matte Mahogany
+
+                </span>
+
+            </div>
+
+
+            <div class="detail-item">
+
+                <span class="detail-label">
+
+                    Warranty
+
+                </span>
+
+                <span class="detail-value">
+
+                    5 Years Limited
+
+                </span>
+
+            </div>
+
+
+        </div>
+
+
+        <div class="price-row">
+
+            <span class="price-label">
+
+                Price
+
+            </span>
+
+            <span class="price-value">
+
+                $299.99
+
+            </span>
+
+        </div>
+
+
+    </div>
+
+
+
+    <!-- =====================================================
+         A-FRAME SCENE
+    ====================================================== -->
+
+    <a-scene
+
+        id="scene"
+
+        embedded
+
+        vr-mode-ui="
+            enabled: false;
+        "
+
+        loading-screen="
+            enabled: false;
+        "
+
+        renderer="
+            logarithmicDepthBuffer: true;
+            colorManagement: true;
+            physicallyCorrectLights: true;
+        "
+
+        arjs="
+            trackingMethod: best;
+            sourceType: webcam;
+            debugUIEnabled: false;
+        "
+
+        gesture-detector>
+
+
+
+        <!-- =================================================
+             ASSETS
+        ================================================== -->
+
+        <a-assets>
+
+            <a-asset-item
+
+                id="chair-model"
+
+                src="asset.gltf"
+
+                crossorigin="anonymous">
+
+            </a-asset-item>
+
+        </a-assets>
+
+
+
+        <!-- =================================================
+             LIGHTING
+        ================================================== -->
+
+
+        <!--
+            LOW AMBIENT LIGHT
+
+            Previous:
+            2.2
+
+            New:
+            0.65
+
+            This prevents the chair from
+            becoming washed out.
+        -->
+
+        <a-entity
+
+            light="
+                type: ambient;
+                color: #ffffff;
+                intensity: 0.65;
+            ">
+
+        </a-entity>
+
+
+
+        <!--
+            WARM KEY LIGHT
+        -->
+
+        <a-entity
+
+            light="
+                type: directional;
+                color: #fff3df;
+                intensity: 0.85;
+            "
+
+            position="
+                2 4 3
+            ">
+
+        </a-entity>
+
+
+
+        <!--
+            COOL FILL LIGHT
+        -->
+
+        <a-entity
+
+            light="
+                type: directional;
+                color: #dce7ff;
+                intensity: 0.30;
+            "
+
+            position="
+                -3 2 1
+            ">
+
+        </a-entity>
+
+
+
+        <!--
+            BACK LIGHT
+
+            Very subtle so the edges
+            of the chair separate
+            from the background.
+        -->
+
+        <a-entity
+
+            light="
+                type: directional;
+                color: #ffffff;
+                intensity: 0.25;
+            "
+
+            position="
+                0 3 -4
+            ">
+
+        </a-entity>
+
+
+
+        <!-- =================================================
+             AR MARKER
+        ================================================== -->
+
+        <a-marker
+
+            id="furniture-marker"
+
+            type="pattern"
+
+            preset="custom"
+
+            url="marker.patt"
+
+            crossorigin="anonymous"
+
+            raycaster="
+                objects: .clickable
+            "
+
+            emitevents="true"
+
+            cursor="
+                fuse: false;
+                rayOrigin: mouse;
+            ">
+
+
+
+            <!-- =============================================
+                 CHAIR
+            ============================================== -->
+
+            <a-entity
+
+                id="chair-entity"
+
+                position="
+                    0 0 0
+                "
+
+                scale="
+                    0.11 0.11 0.11
+                "
+
+                rotation="
+                    -90 0 0
+                "
+
+                gltf-model="
+                    #chair-model
+                "
+
+                class="
+                    clickable
+                "
+
+                gesture-handler="
+                    minScale: 0.01;
+                    maxScale: 3;
+                ">
+
+            </a-entity>
+
+
+        </a-marker>
+
+
+
+        <!-- =================================================
+             CAMERA
+        ================================================== -->
+
+        <a-entity
+
+            id="camera"
+
+            camera>
+
+        </a-entity>
+
+
+    </a-scene>
+
+
+
+    <!-- =====================================================
+         JAVASCRIPT
+    ====================================================== -->
+
+    <script>
+
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            function () {
+
+
+                /* =================================================
+                   GET ELEMENTS
+                ================================================== */
+
+                const scene =
+                    document.getElementById(
+                        "scene"
+                    );
+
+
+                const marker =
+                    document.getElementById(
+                        "furniture-marker"
+                    );
+
+
+                const chair =
+                    document.getElementById(
+                        "chair-entity"
+                    );
+
+
+                const camera =
+                    document.getElementById(
+                        "camera"
+                    );
+
+
+                const card =
+                    document.getElementById(
+                        "productCard"
+                    );
+
+
+                const gestureHint =
+                    document.getElementById(
+                        "gestureHint"
+                    );
+
+
+                const placedLabel =
+                    document.getElementById(
+                        "placedLabel"
+                    );
+
+
+                const resetButton =
+                    document.getElementById(
+                        "resetButton"
+                    );
+
+
+
+                /* =================================================
+                   APPLICATION STATE
+                ================================================== */
+
+                let chairPlaced =
+                    false;
+
+
+                let dragging =
+                    false;
+
+
+                let pointerId =
+                    null;
+
+
+                /*
+                 * Distance of chair from camera.
+                 *
+                 * Negative Z = in front
+                 * of camera.
+                 */
+
+                const chairDepth =
+                    -2.2;
+
+
+
+                /* =================================================
+                   MARKER FOUND
+                ================================================== */
+
+                marker.addEventListener(
+                    "markerFound",
+                    function () {
+
+
+                        /*
+                         * Show the interaction
+                         * instruction.
+                         */
+
+                        gestureHint.style.display =
+                            "block";
+
+
+                        /*
+                         * Do NOT show product card.
+                         *
+                         * User has to tap chair.
+                         */
+
+                    }
+                );
+
+
+
+                /* =================================================
+                   MARKER LOST
+                ================================================== */
+
+                marker.addEventListener(
+                    "markerLost",
+                    function () {
+
+
+                        /*
+                         * If chair has NOT been
+                         * placed, hide the hint.
+                         *
+                         * If chair has been placed,
+                         * leave everything visible.
+                         */
+
+                        if (!chairPlaced) {
+
+                            gestureHint.style.display =
+                                "none";
+
+                        }
+
+                    }
+                );
+
+
+
+                /* =================================================
+                   CHAIR CLICK
+                ================================================== */
+
+                chair.addEventListener(
+                    "click",
+                    function (event) {
+
+
+                        /*
+                         * Prevent the click from
+                         * propagating to the scene.
+                         */
+
+                        event.stopPropagation();
+
+
+
+                        /*
+                         * First click releases
+                         * chair from marker.
+                         */
+
+                        if (!chairPlaced) {
+
+                            placeChair();
+
+                        }
+
+
+                        /*
+                         * Show/hide product card.
+                         */
+
+                        toggleCard();
+
+                    }
+                );
+
+
+
+                /* =================================================
+                   PLACE CHAIR
+                ================================================== */
+
+                function placeChair() {
+
+
+                    chairPlaced =
+                        true;
+
+
+                    /*
+                     * THREE.JS OBJECTS
+                     */
+
+                    const chairObject =
+                        chair.object3D;
+
+
+                    const cameraObject =
+                        camera.object3D;
+
+
+
+                    /*
+                     * Update world matrices
+                     * before re-parenting.
+                     */
+
+                    cameraObject.updateMatrixWorld(
+                        true
+                    );
+
+
+                    chairObject.updateMatrixWorld(
+                        true
+                    );
+
+
+
+                    /*
+                     * ------------------------------------------------
+                     * IMPORTANT
+                     *
+                     * Re-parent chair from:
+                     *
+                     * MARKER → CAMERA
+                     *
+                     * while keeping its world transform.
+                     * ------------------------------------------------
+                     */
+
+                    cameraObject.attach(
+                        chairObject
+                    );
+
+
+
+                    /*
+                     * Position chair in front
+                     * of the camera.
+                     */
+
+                    chairObject.position.set(
+
+                        0,
+
+                        -0.15,
+
+                        chairDepth
+
+                    );
+
+
+
+                    /*
+                     * Restore model orientation.
+                     */
+
+                    chairObject.rotation.set(
+
+                        -Math.PI / 2,
+
+                        0,
+
+                        0
+
+                    );
+
+
+
+                    /*
+                     * Restore reasonable size.
+                     */
+
+                    chairObject.scale.set(
+
+                        0.11,
+
+                        0.11,
+
+                        0.11
+
+                    );
+
+
+
+                    chairObject.updateMatrixWorld(
+                        true
+                    );
+
+
+
+                    /*
+                     * Synchronize A-Frame DOM
+                     * hierarchy with THREE hierarchy.
+                     */
+
+                    camera.appendChild(
+                        chair
+                    );
+
+
+
+                    /*
+                     * Update UI.
+                     */
+
+                    placedLabel.style.display =
+                        "block";
+
+
+                    resetButton.style.display =
+                        "block";
+
+
+                    gestureHint.innerHTML =
+                        "Drag chair to move • Pinch to resize";
+
+                }
+
+
+
+                /* =================================================
+                   PRODUCT CARD TOGGLE
+                ================================================== */
+
+                function toggleCard() {
+
+
+                    const isVisible =
+                        card.classList.contains(
+                            "show"
+                        );
+
+
+                    if (isVisible) {
+
+
+                        /*
+                         * Hide card.
+                         */
+
+                        card.classList.remove(
+                            "show"
+                        );
+
+
+                        setTimeout(
+                            function () {
+
+
+                                if (
+                                    !card.classList.contains(
+                                        "show"
+                                    )
+                                ) {
+
+                                    card.style.display =
+                                        "none";
+
+                                }
+
+
+                            },
+                            250
+                        );
+
+
+                    }
+
+                    else {
+
+
+                        /*
+                         * Show card.
+                         */
+
+                        card.style.display =
+                            "block";
+
+
+                        requestAnimationFrame(
+                            function () {
+
+                                card.classList.add(
+                                    "show"
+                                );
+
+                            }
+                        );
+
+                    }
+
+                }
+
+
+
+                /* =================================================
+                   POINTER DOWN
+                ================================================== */
+
+                chair.addEventListener(
+                    "pointerdown",
+                    function (event) {
+
+
+                        /*
+                         * Dragging only works
+                         * after chair is placed.
+                         */
+
+                        if (!chairPlaced)
+                            return;
+
+
+                        dragging =
+                            true;
+
+
+                        pointerId =
+                            event.pointerId;
+
+
+
+                        /*
+                         * Capture pointer.
+
+                         * This prevents the drag
+                         * from breaking when the
+                         * finger moves outside
+                         * the chair.
+                         */
+
+                        if (
+                            event.target.setPointerCapture
+                        ) {
+
+                            event.target.setPointerCapture(
+                                pointerId
+                            );
+
+                        }
+
+
+                        event.stopPropagation();
+
+                    }
+                );
+
+
+
+                /* =================================================
+                   POINTER MOVE
+                ================================================== */
+
+                chair.addEventListener(
+                    "pointermove",
+                    function (event) {
+
+
+                        if (!dragging)
+                            return;
+
+
+                        if (
+                            event.pointerId !==
+                            pointerId
+                        )
+                            return;
+
+
+                        moveChair(
+                            event.clientX,
+                            event.clientY
+                        );
+
+                    }
+                );
+
+
+
+                /* =================================================
+                   POINTER UP
+                ================================================== */
+
+                chair.addEventListener(
+                    "pointerup",
+                    function (event) {
+
+
+                        if (
+                            event.pointerId !==
+                            pointerId
+                        )
+                            return;
+
+
+                        dragging =
+                            false;
+
+
+                        pointerId =
+                            null;
+
+                    }
+                );
+
+
+
+                /* =================================================
+                   POINTER CANCEL
+                ================================================== */
+
+                chair.addEventListener(
+                    "pointercancel",
+                    function () {
+
+
+                        dragging =
+                            false;
+
+
+                        pointerId =
+                            null;
+
+                    }
+                );
+
+
+
+                /* =================================================
+                   MOVE CHAIR
+                ================================================== */
+
+                function moveChair(
+                    screenX,
+                    screenY
+                ) {
+
+
+                    /*
+                     * Make sure A-Frame
+                     * has created its canvas.
+                     */
+
+                    const canvas =
+                        scene.canvas;
+
+
+                    if (!canvas)
+                        return;
+
+
+
+                    /*
+                     * Canvas dimensions.
+                     */
+
+                    const rect =
+                        canvas.getBoundingClientRect();
+
+
+
+                    /*
+                     * Convert screen position
+                     * to normalized device coordinates.
+                     */
+
+                    const ndcX =
+
+                        (
+                            (
+                                screenX -
+                                rect.left
+                            )
+                            /
+                            rect.width
+                        ) * 2 - 1;
+
+
+
+                    const ndcY =
+
+                        -(
+                            (
+                                screenY -
+                                rect.top
+                            )
+                            /
+                            rect.height
+                        ) * 2 + 1;
+
+
+
+                    /*
+                     * THREE.JS raycaster.
+                     */
+
+                    const raycaster =
+                        new THREE.Raycaster();
+
+
+
+                    const mouse =
+                        new THREE.Vector2(
+                            ndcX,
+                            ndcY
+                        );
+
+
+
+                    /*
+                     * A-Frame camera.
+                     */
+
+                    const threeCamera =
+                        scene.camera;
+
+
+
+                    raycaster.setFromCamera(
+                        mouse,
+                        threeCamera
+                    );
+
+
+
+                    /*
+                     * Invisible plane in front
+                     * of the camera.
+                     *
+                     * Chair moves along this plane.
+                     */
+
+                    const plane =
+                        new THREE.Plane(
+
+                            new THREE.Vector3(
+                                0,
+                                0,
+                                1
+                            ),
+
+                            -chairDepth
+
+                        );
+
+
+
+                    const intersection =
+                        new THREE.Vector3();
+
+
+
+                    /*
+                     * Find intersection.
+                     */
+
+                    if (
+
+                        raycaster.ray.intersectPlane(
+
+                            plane,
+
+                            intersection
+
+                        )
+
+                    ) {
+
+
+                        /*
+                         * Convert world position
+                         * to camera-local position.
+                         */
+
+                        camera.object3D.worldToLocal(
+                            intersection
+                        );
+
+
+
+                        /*
+                         * Keep chair on screen.
+                         */
+
+                        intersection.x =
+                            Math.max(
+                                -1.5,
+                                Math.min(
+                                    1.5,
+                                    intersection.x
+                                )
+                            );
+
+
+                        intersection.y =
+                            Math.max(
+                                -1.8,
+                                Math.min(
+                                    1.8,
+                                    intersection.y
+                                )
+                            );
+
+
+                        /*
+                         * Keep constant depth.
+                         */
+
+                        intersection.z =
+                            chairDepth;
+
+
+
+                        /*
+                         * Apply position.
+                         */
+
+                        chair.object3D.position.copy(
+                            intersection
+                        );
+
+
+                        chair.object3D.updateMatrixWorld(
+                            true
+                        );
+
+                    }
+
+                }
+
+
+
+                /* =================================================
+                   RESET
+                ================================================== */
+
+                resetButton.addEventListener(
+                    "click",
+                    function () {
+
+                        resetChair();
+
+                    }
+                );
+
+
+
+                function resetChair() {
+
+
+                    chairPlaced =
+                        false;
+
+
+                    dragging =
+                        false;
+
+
+
+                    /*
+                     * Re-parent chair
+                     * back to marker.
+                     */
+
+                    marker.object3D.attach(
+                        chair.object3D
+                    );
+
+
+
+                    /*
+                     * Restore original
+                     * marker position.
+                     */
+
+                    chair.object3D.position.set(
+
+                        0,
+
+                        0,
+
+                        0
+
+                    );
+
+
+
+                    /*
+                     * Restore original
+                     * orientation.
+                     */
+
+                    chair.object3D.rotation.set(
+
+                        -Math.PI / 2,
+
+                        0,
+
+                        0
+
+                    );
+
+
+
+                    /*
+                     * Restore original
+                     * scale.
+                     */
+
+                    chair.object3D.scale.set(
+
+                        0.11,
+
+                        0.11,
+
+                        0.11
+
+                    );
+
+
+
+                    /*
+                     * Synchronize DOM hierarchy.
+                     */
+
+                    marker.appendChild(
+                        chair
+                    );
+
+
+
+                    /*
+                     * Hide product card.
+                     */
+
+                    card.classList.remove(
+                        "show"
+                    );
+
+
+                    card.style.display =
+                        "none";
+
+
+
+                    /*
+                     * Hide placement UI.
+                     */
+
+                    placedLabel.style.display =
+                        "none";
+
+
+                    resetButton.style.display =
+                        "none";
+
+
+
+                    /*
+                     * Restore instructions.
+                     */
+
+                    gestureHint.innerHTML =
+                        "Tap chair for details";
+
+
+                }
+
+            }
+
+        );
+
+    </script>
+
+</body>
+
 </html>
