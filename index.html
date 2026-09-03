@@ -9,6 +9,41 @@
         <script src="https://cdn.jsdelivr.net/gh/fcor/arjs-gestures@master/dist/gestures.js"></script>
 
         <style>
+            /* Catalogue Navigation Arrows */
+            .nav-arrow {
+                position: fixed;
+                top: 50%;
+                transform: translateY(-50%);
+                width: 50px;
+                height: 50px;
+                background: rgba(255, 255, 255, 0.9);
+                color: #000000;
+                border: none;
+                border-radius: 50%;
+                font-size: 1.8rem;
+                font-weight: bold;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+                z-index: 10000;
+                cursor: pointer;
+                display: none;
+                align-items: center;
+                justify-content: center;
+                user-select: none;
+            }
+
+            .nav-arrow:active {
+                transform: translateY(-50%) scale(0.9);
+                background: #ffffff;
+            }
+
+            #prevBtn {
+                left: 15px;
+            }
+
+            #nextBtn {
+                right: 15px;
+            }
+
             /* Glassmorphic 2D Information Card */
             .ar-info-card {
                 position: fixed;
@@ -31,7 +66,7 @@
 
             .ar-info-card.visible {
                 display: block;
-                animation: slideUp 0.3s ease forward;
+                animation: slideUp 0.3s ease forwards;
             }
 
             @keyframes slideUp {
@@ -125,7 +160,7 @@
                 text-align: center;
             }
 
-            /* Reset Button (↻ Return chair to marker) */
+            /* Reset Button */
             .reset-btn {
                 position: fixed;
                 top: 20px;
@@ -144,10 +179,6 @@
                 display: none;
                 align-items: center;
                 justify-content: center;
-            }
-
-            .reset-btn:active {
-                transform: scale(0.9);
             }
         </style>
 
@@ -195,26 +226,30 @@
         <!-- Step Hint Banner -->
         <div id="gestureHint" class="gesture-hint">Scan card to begin</div>
 
+        <!-- Navigation Arrows for Catalogue -->
+        <button id="prevBtn" class="nav-arrow">‹</button>
+        <button id="nextBtn" class="nav-arrow">›</button>
+
         <!-- Return Chair Button -->
         <button id="resetBtn" class="reset-btn" title="Return chair to marker">↻</button>
 
         <!-- Product Card Overlay -->
         <div id="productCard" class="ar-info-card">
             <div class="brand">LUXURY COMFORT CO.</div>
-            <div class="title">Ergonomic Luxury Armchair</div>
+            <div id="cardTitle" class="title">Ergonomic Luxury Armchair</div>
 
             <div class="details-grid">
                 <div class="detail-item">
                     <span class="detail-label">Comfort Level</span>
-                    <span class="detail-value">Ultra Soft / Ergonomic</span>
+                    <span id="cardComfort" class="detail-value">Ultra Soft / Ergonomic</span>
                 </div>
                 <div class="detail-item">
                     <span class="detail-label">Material</span>
-                    <span class="detail-value">Solid Wood & Leather</span>
+                    <span id="cardMaterial" class="detail-value">Solid Wood & Leather</span>
                 </div>
                 <div class="detail-item">
                     <span class="detail-label">Finish</span>
-                    <span class="detail-value">Matte Mahogany</span>
+                    <span id="cardFinish" class="detail-value">Matte Mahogany</span>
                 </div>
                 <div class="detail-item">
                     <span class="detail-label">Warranty</span>
@@ -224,7 +259,7 @@
 
             <div class="price-row">
                 <span class="price-label">Price</span>
-                <span class="price-value">$299.99</span>
+                <span id="cardPrice" class="price-value">$299.99</span>
             </div>
         </div>
 
@@ -236,12 +271,16 @@
             arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false;"
             id="scene"
             gesture-detector
+            cursor="rayOrigin: mouse; fuse: false;"
+            raycaster="objects: .clickable; far: 10000; interval: 100;"
         >
             <a-assets>
-                <a-asset-item id="chair-model" src="asset.gltf" crossorigin="anonymous"></a-asset-item>
+                <!-- Multiple Catalogue Models -->
+                <a-asset-item id="asset0" src="asset.gltf" crossorigin="anonymous"></a-asset-item>
+                <a-asset-item id="asset1" src="asset1.gltf" crossorigin="anonymous"></a-asset-item>
             </a-assets>
 
-            <!-- Balanced Soft Lighting Setup (Prevents Over-exposure) -->
+            <!-- Lighting Setup -->
             <a-entity light="type: ambient; intensity: 0.7; color: #ffffff;"></a-entity>
             <a-entity light="type: directional; intensity: 0.8; castShadow: true;" position="1 3 2"></a-entity>
             <a-entity light="type: hemisphere; intensity: 0.4; groundColor: #444444; color: #ffffff;"></a-entity>
@@ -253,23 +292,31 @@
                 preset="custom"
                 url="marker.patt"
                 crossorigin="anonymous"
-                raycaster="objects: .clickable"
                 emitevents="true"
-                cursor="fuse: false; rayOrigin: mouse;"
             >
                 <!-- Anchor Container Inside Marker -->
                 <a-entity id="marker-anchor">
-                    <!-- 3D Chair Entity -->
+                    <!-- Parent Entity with Touch Hitbox -->
                     <a-entity
                         id="chair-entity"
                         position="0 0 0"
                         scale="0.11 0.11 0.11"
                         rotation="-90 0 0"
-                        gltf-model="#chair-model"
                         class="clickable"
                         gesture-handler="minScale: 0.01; maxScale: 30;"
                         free-drag
                     >
+                        <!-- Dynamic Model Asset -->
+                        <a-entity id="model-node" gltf-model="#asset0"></a-entity>
+
+                        <!-- Invisible Large Tap Hitbox Box -->
+                        <a-box
+                            position="0 0 0"
+                            scale="15 15 15"
+                            material="transparent: true; opacity: 0.001;"
+                            class="clickable"
+                        ></a-box>
+
                         <!-- Floating NEW ARRIVAL Badge Header -->
                         <a-entity id="new-arrival-header" position="0 15 0" rotation="90 0 0" visible="false">
                             <a-plane
@@ -303,6 +350,43 @@
         <script>
             window.isChairReleased = false;
 
+            // Catalogue Data
+            const catalogue = [
+                {
+                    model: '#asset0',
+                    title: 'Ergonomic Luxury Armchair',
+                    comfort: 'Ultra Soft / Ergonomic',
+                    material: 'Solid Wood & Leather',
+                    finish: 'Matte Mahogany',
+                    price: '$299.99'
+                },
+                {
+                    model: '#asset1',
+                    title: 'Minimalist Dining Chair',
+                    comfort: 'Firm / Structured',
+                    material: 'Teak Wood & Fabric',
+                    finish: 'Dark Walnut',
+                    price: '$189.99'
+                }
+            ];
+
+            let currentIndex = 0;
+
+            function updateCatalogue(index) {
+                const item = catalogue[index];
+                const modelNode = document.getElementById('model-node');
+                
+                // Switch 3D Model
+                modelNode.setAttribute('gltf-model', item.model);
+
+                // Update Info Card Metadata
+                document.getElementById('cardTitle').textContent = item.title;
+                document.getElementById('cardComfort').textContent = item.comfort;
+                document.getElementById('cardMaterial').textContent = item.material;
+                document.getElementById('cardFinish').textContent = item.finish;
+                document.getElementById('cardPrice').textContent = item.price;
+            }
+
             document.addEventListener('DOMContentLoaded', () => {
                 const marker = document.getElementById('furniture-marker');
                 const chair = document.getElementById('chair-entity');
@@ -312,19 +396,12 @@
                 const card = document.getElementById('productCard');
                 const gestureHint = document.getElementById('gestureHint');
                 const resetBtn = document.getElementById('resetBtn');
+                const prevBtn = document.getElementById('prevBtn');
+                const nextBtn = document.getElementById('nextBtn');
 
-                // 1. Scan card -> SCAN SUCCESSFUL
-                marker.addEventListener('markerFound', () => {
+                // Helper Function for Chair Release & Tap Toggle
+                function triggerChairTap() {
                     if (!window.isChairReleased) {
-                        gestureHint.textContent = "SCAN SUCCESSFUL • Tap chair to explore";
-                    }
-                });
-
-                // Interaction Logic
-                chair.addEventListener('click', () => {
-                    // Step 3: Tap chair -> Chair releases from marker + product card slides up
-                    if (!window.isChairReleased) {
-                        // Capture current world transform before un-parenting from marker
                         const worldPos = new THREE.Vector3();
                         const worldQuat = new THREE.Quaternion();
                         const worldScale = new THREE.Vector3();
@@ -333,7 +410,6 @@
                         chair.object3D.getWorldQuaternion(worldQuat);
                         chair.object3D.getWorldScale(worldScale);
 
-                        // Attach to world anchor so it persists when moving camera away from marker
                         worldAnchor.object3D.add(chair.object3D);
 
                         chair.object3D.position.copy(worldPos);
@@ -342,27 +418,61 @@
 
                         window.isChairReleased = true;
                         
-                        // Show Product Card & Reset button
                         card.classList.add('visible');
                         resetBtn.style.display = 'flex';
                         newArrivalHeader.setAttribute('visible', 'true');
 
-                        gestureHint.textContent = "Drag to place • Pinch to resize • Tap again for info";
+                        gestureHint.textContent = "Drag to place • Pinch to resize • Use arrows to switch";
                     } else {
-                        // Step 6: Tap chair again -> Toggle Product Card visibility
                         if (card.classList.contains('visible')) {
                             card.classList.remove('visible');
                         } else {
                             card.classList.add('visible');
                         }
                     }
+                }
+
+                // Scan detection
+                marker.addEventListener('markerFound', () => {
+                    prevBtn.style.display = 'flex';
+                    nextBtn.style.display = 'flex';
+                    if (!window.isChairReleased) {
+                        gestureHint.textContent = "SCAN SUCCESSFUL • Tap chair or use arrows";
+                    }
                 });
 
-                // Step 7: Reset button ↻ -> Return chair to marker
+                // Next Button Event
+                nextBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    currentIndex = (currentIndex + 1) % catalogue.length;
+                    updateCatalogue(currentIndex);
+                });
+
+                // Previous Button Event
+                prevBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    currentIndex = (currentIndex - 1 + catalogue.length) % catalogue.length;
+                    updateCatalogue(currentIndex);
+                });
+
+                // Primary Click/Tap Event
+                chair.addEventListener('click', triggerChairTap);
+
+                // Touch Fallback Trigger for Mobile Browsers
+                window.addEventListener('touchend', (e) => {
+                    if (e.changedTouches.length === 1 && !window.isChairReleased) {
+                        const touch = e.changedTouches[0];
+                        const element = document.elementFromPoint(touch.clientX, touch.clientY);
+                        if (element && element.tagName.toLowerCase() === 'canvas') {
+                            triggerChairTap();
+                        }
+                    }
+                });
+
+                // Reset button ↻
                 resetBtn.addEventListener('click', () => {
                     markerAnchor.object3D.add(chair.object3D);
 
-                    // Reset local transformation defaults
                     chair.setAttribute('position', '0 0 0');
                     chair.setAttribute('scale', '0.11 0.11 0.11');
                     chair.setAttribute('rotation', '-90 0 0');
