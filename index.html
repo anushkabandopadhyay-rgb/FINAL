@@ -9,7 +9,7 @@
         <script src="https://cdn.jsdelivr.net/gh/fcor/arjs-gestures@master/dist/gestures.js"></script>
 
         <style>
-            /* Catalogue Navigation Arrows */
+            /* Navigation Arrows */
             .nav-arrow {
                 position: fixed;
                 top: 50%;
@@ -152,7 +152,7 @@
                 color: #000000;
             }
 
-            /* Step Helper Guidance Banner */
+            /* Guidance Banner */
             .gesture-hint {
                 position: fixed;
                 top: 20px;
@@ -196,7 +196,7 @@
         </style>
 
         <script>
-            // Custom Drag & Free Anchor Logic
+            // Screen-Centered Free Drag Logic
             AFRAME.registerComponent('free-drag', {
                 init: function () {
                     this.isDragging = false;
@@ -285,7 +285,6 @@
             raycaster="objects: .clickable; far: 10000; interval: 100;"
         >
             <a-assets>
-                <!-- Explicit asset loading for root files asset.gltf & asset1.gltf -->
                 <a-asset-item id="primary-asset" src="asset.gltf" crossorigin="anonymous"></a-asset-item>
                 <a-asset-item id="secondary-asset" src="asset1.gltf" crossorigin="anonymous"></a-asset-item>
             </a-assets>
@@ -302,6 +301,7 @@
                 emitevents="true"
             >
                 <a-entity id="marker-anchor">
+                    <!-- Centered Position and Normalized Orientation -->
                     <a-entity
                         id="chair-entity"
                         position="0 0 0"
@@ -311,7 +311,6 @@
                         gesture-handler="minScale: 0.01; maxScale: 30;"
                         free-drag
                     >
-                        <!-- Dynamic GLTF Node targeting assets -->
                         <a-entity id="active-model" gltf-model="#primary-asset"></a-entity>
 
                         <a-box
@@ -332,7 +331,6 @@
         <script>
             window.isChairReleased = false;
 
-            // Mapping for root repository asset files
             const catalogue = [
                 {
                     assetId: '#primary-asset',
@@ -358,10 +356,8 @@
                 const item = catalogue[index];
                 const activeModel = document.getElementById('active-model');
 
-                // Swap GLTF target asset
                 activeModel.setAttribute('gltf-model', item.assetId);
 
-                // Update card metadata
                 document.getElementById('cardTitle').textContent = item.title;
                 document.getElementById('cardComfort').textContent = item.comfort;
                 document.getElementById('cardMaterial').textContent = item.material;
@@ -382,19 +378,24 @@
 
                 function triggerChairTap() {
                     if (!window.isChairReleased) {
-                        const worldPos = new THREE.Vector3();
-                        const worldQuat = new THREE.Quaternion();
-                        const worldScale = new THREE.Vector3();
+                        const cameraEl = document.querySelector('[camera]');
+                        const cameraThree = cameraEl.object3D;
+                        
+                        // Center asset directly in front of camera view
+                        const cameraDirection = new THREE.Vector3();
+                        cameraThree.getWorldDirection(cameraDirection);
+                        
+                        const cameraPosition = new THREE.Vector3();
+                        cameraThree.getWorldPosition(cameraPosition);
 
-                        chair.object3D.getWorldPosition(worldPos);
-                        chair.object3D.getWorldQuaternion(worldQuat);
-                        chair.object3D.getWorldScale(worldScale);
+                        const targetPosition = new THREE.Vector3()
+                            .copy(cameraPosition)
+                            .add(cameraDirection.multiplyScalar(-1.5));
 
                         worldAnchor.object3D.add(chair.object3D);
 
-                        chair.object3D.position.copy(worldPos);
-                        chair.object3D.quaternion.copy(worldQuat);
-                        chair.object3D.scale.copy(worldScale);
+                        chair.object3D.position.copy(targetPosition);
+                        chair.object3D.rotation.set(0, 0, 0);
 
                         window.isChairReleased = true;
                         
